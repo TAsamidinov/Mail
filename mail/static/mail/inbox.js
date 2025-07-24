@@ -57,15 +57,10 @@ function load_mailbox(mailbox) {
     emails.forEach(email => {
       const emailElement = document.createElement('div');
       emailElement.className = 'email-item';
-      emailElement.innerHTML = `<strong>${email.sender}</strong> <==|==> ${email.subject} <==|==> <span class="date">${email.timestamp}</span>`;
-      
-      if (email.read) {
-        emailElement.style.backgroundColor = 'gray';
-      }
-      else {
-        emailElement.style.backgroundColor = 'white';
-      }
-
+      emailElement.innerHTML = `<a href="/emails/${email.id}" style="color: black">  <strong>${email.sender}</strong> <==|==> ${email.subject} <==|==> <span class="date">${email.timestamp}</span></a>`;
+      emailElement.style.backgroundColor = email.read ? 'gray' : 'white';
+      emailElement.style.padding = '10px';
+      emailElement.style.marginBottom = '10px';
       emailElement.addEventListener('click', () => view_email(email.id));
       document.querySelector('#emails-view').appendChild(emailElement);
     });
