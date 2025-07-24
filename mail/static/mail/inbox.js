@@ -34,11 +34,42 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   };
+  document.querySelector
 });
+
+function render_Email(email_id) {
+  fetch('/emails/' + email_id, { method: 'GET' })
+  .then(response => response.json())
+  .then(email => {
+    document.querySelector('#emails-view').style.display = 'none';
+    document.querySelector('#compose-view').style.display = 'none';
+    
+    const emailView = document.querySelector('#email-view');
+    emailView.style.display = 'block';
+    
+    emailView.innerHTML = `
+      <h3>${email.subject}</h3>
+      <p><strong>From:</strong> ${email.sender}</p>
+      <p><strong>To:</strong> ${email.recipients.join(', ')}</p>
+      <p><strong>Timestamp:</strong> ${email.timestamp}</p>
+      <hr>
+      <p>${email.body}</p>
+    `;
+    
+    if (!email.read) {
+      fetch('/emails/' + email_id, {
+        method: 'PUT',
+        body: JSON.stringify({ read: true })
+      });
+    }
+  });
+
+}
 
 function compose_email() {
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
+  document.querySelector('#email-view').style.display = 'none';
 
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
@@ -48,6 +79,7 @@ function compose_email() {
 function load_mailbox(mailbox) {
   document.querySelector('#emails-view').style.display = 'block';
   document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
 
   document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
@@ -57,7 +89,17 @@ function load_mailbox(mailbox) {
     emails.forEach(email => {
       const emailElement = document.createElement('div');
       emailElement.className = 'email-item';
-      emailElement.innerHTML = `<a href="/emails/${email.id}" style="color: black">  <strong>${email.sender}</strong> <==|==> ${email.subject} <==|==> <span class="date">${email.timestamp}</span></a>`;
+      
+      emailElement.innerHTML = `
+        <a href="#" style="color: black" id="email-${email.id}">
+          <strong>${email.sender}</strong> <==|==> ${email.subject} <==|==> 
+          <span class="date">${email.timestamp}</span>
+        </a>
+      `;
+      emailElement.addEventListener('click', () => {
+        render_Email(email.id); 
+      });
+
       emailElement.style.backgroundColor = email.read ? 'gray' : 'white';
       emailElement.style.padding = '10px';
       emailElement.style.marginBottom = '10px';
